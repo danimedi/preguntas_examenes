@@ -1,4 +1,3 @@
-library(pdftools)
 library(dplyr)
 library(stringr)
 library(rmarkdown)
@@ -16,56 +15,18 @@ library(rmarkdown)
 #' @export
 extract_questions <- function(pdf_input) {
   
-  dat_full <- pdf_data(pdf_input)
-  
-  # Deal with pages and columns to create a unified data set -------------
-  
-  filter_questions <- function(df) {
-    filter(df, height == 10 | (height == 11 & text == "MIR"))
-  }
-  dat <- lapply(dat_full, filter_questions)
-  
-  # Split columns
-  split_columns <- function(df, x_limit = 295) {
-    left <- filter(df, x < x_limit)
-    right <- filter(df, x >= x_limit)
-    list(left, right)
-  }
-  
-  # Sort values within each column
-  sort_column <- function(df) {
-    arrange(df, y, x)
-  }
-  
-  split_sort_join <- function(df_page) {
-    res <- split_columns(df_page)
-    res <- lapply(res, sort_column)
-    do.call(bind_rows, res)
-  }
-  dat <- lapply(dat, split_sort_join)
-  dat <- do.call(bind_rows, dat)
-  
-  # Identify questions and choices and collapse into text -----------------
+  # "MIR" is used to separate questions
+  dat <- pdf_read_and_filter(
+    pdf_input,
+    height == 10 | (height == 11 & text == "MIR")
+  )
   
   # Split by questions
-  frameshift <- function(x, offset) {
-    x[((1:length(x))-1-offset) %% length(x)+1]
-  }
   i_beginning <- which(
     dat$text == "MIR" &
       dat$height == 11 &
       str_detect(frameshift(dat$text, offset = -1), "^\\d+[.]$")
   )
-  split_by_index <- function(df, i, right) {
-    j <- cut(
-      seq_len(nrow(df)),
-      breaks = c(-Inf, i, Inf),
-      include.lowest = TRUE,
-      labels = FALSE,
-      right = right
-    )
-    split(df, j)
-  }
   dat <- split_by_index(dat, i_beginning, right = FALSE)
   
   # "MIR" text no longer needed
@@ -98,28 +59,4 @@ extract_questions <- function(pdf_input) {
   }
   dat <- lapply(dat, split_and_collapse_question)
   dat
-}
-
-
-
-#' Save the text of the questions in a list to a PDF file
-#' 
-#' Save the output of the function [extract_questions()] as a PDF file.
-#'
-#' @param df_list List obtained from the function [extract_questions()].
-#' @param pdf_output Path to the output PDF file.
-#'
-#' @export
-write_questions <- function(df_list, pdf_output) {
-  # Collapse into text
-  text <- paste0(df_list, collapse = "\n\n\n")
-  
-  create_pdf <- function(text, output_file) {
-    temp_file <- gsub("[.]pdf$", ".Rmd", output_file)
-    options(encoding = "UTF-8")
-    cat(text, file = temp_file, sep = "\n\n\n")
-    render(temp_file, pdf_document())
-    file.remove(temp_file)
-  }
-  create_pdf(text, pdf_output)
 }
