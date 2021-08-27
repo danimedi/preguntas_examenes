@@ -17,7 +17,7 @@ split_by_chapters <- function(pdf_book, dir_output) {
     pages,
     breaks = c(
       -Inf,
-      13, 85, 103, 187, 229, 299, 339, 337, 433, 447, 507,
+      13, 85, 103, 187, 229, 299, 339, 377, 433, 447, 507,
       545, 605, 647, 663, 679, 711, 741, 777, 803, 822,
       Inf
     ),
@@ -39,7 +39,10 @@ split_by_chapters <- function(pdf_book, dir_output) {
   )
   
   for (i in seq_along(chapters_pages)) {
-    file_name <- file.path(dir_output, paste0(chapters_names[[i]], ".pdf"))
-    pdf_subset(pdf_book, pages = chapters_pages[[i]], output = file_name)
+    file_name <- chapters_names[[i]]
+    Encoding(file_name) <- "UTF-8"
+    file_name <- file.path(dir_output, paste0(file_name, ".pdf"))
+    pdf_subset(pdf_book, pages = chapters_pages[[i]], output = chapters_names[[i]])
+    file.rename(chapters_names[[i]], file_name)
   }
 }
