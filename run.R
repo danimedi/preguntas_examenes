@@ -10,13 +10,8 @@ questions <- extract_questions("data/test_dummy.pdf")
 answers <- extract_answers("data/test_dummy.pdf")
 # write_list(questions, "output/test_dummy.pdf")
 
-for (file in list.files("data/chapters", full.names = TRUE)) {
-  tryCatch({
-    res <- get_questions_and_answers(file)
-    file_name <- sub("(.*)\\..*$", "\\1", basename(file)) |>
-      paste0(".rds") |>
-      {\(x) file.path("output", x)}()
-    saveRDS(res, file_name)
-  }, error = \(cnd) print(paste("Error in", file)))
-}
+chapters_paths <- list.files("data/chapters", full.names = TRUE)
+full_info <- lapply(chapters_paths, get_questions_and_answers)
+names(full_info) <- sub("(.*)\\..*$", "\\1", basename(chapters_paths))
+saveRDS(full_info, "output/full_info.rds")
 
