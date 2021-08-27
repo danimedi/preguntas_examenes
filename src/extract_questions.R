@@ -54,7 +54,7 @@ extract_questions <- function(pdf_input) {
     choices <- lapply(choices, collapse_to_text)
     paste0(
       "_", collapse_to_text(question), "\n\n",
-      paste0(choices, collapse = "\n")
+      paste0(choices, "_", collapse = "\n")
     )
   }
   dat <- lapply(dat, split_and_collapse_question)
