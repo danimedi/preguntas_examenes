@@ -42,10 +42,27 @@ write_question_bank <- function(question_bank, dir_output) {
     prefix <- formatC(k, width = 3, format = "d", flag = "0")
     k <- k + 1
     
+    write_list_safe <- function(x, filename) {
+      if (!basename(filename) %in% list.files(dir_output)) {
+        tryCatch(
+          write_list(x, filename),
+          error = function(cnd) {
+            warning(
+              "File ", basename(filename), ": ",
+              "Problems writing the PDF"
+            )
+          }
+        )
+      }
+    }
+    
     questions <- lapply(block, \(x) x$question)
-    write_list(questions, file.path(dir_output, paste0(prefix, "_questions.pdf")))
+    filename <- file.path(dir_output, paste0(prefix, "_questions.pdf"))
+    write_list_safe(questions, filename)
     
     answers <- lapply(block, \(x) x$answer)
-    write_list(answers, file.path(dir_output, paste0(prefix, "_answers.pdf")))
+    filename <- file.path(dir_output, paste0(prefix, "_answers.pdf"))
+    write_list_safe(answers, filename)
   }
 }
+
