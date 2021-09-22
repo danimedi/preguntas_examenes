@@ -18,6 +18,6 @@ saveRDS(full_info, "data/full_info.rds")
 
 # Get and write question bank ------------------------
 full_info <- readRDS("data/full_info.rds")
-question_bank <- get_question_bank(full_info)
-write_question_bank(question_bank, "output")
+question_bank <- get_question_bank(full_info, block_size = 40, seed = 1)
+write_question_bank(question_bank, "output/seed_1")
 

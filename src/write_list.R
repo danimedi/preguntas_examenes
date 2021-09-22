@@ -1,3 +1,5 @@
+library(rmarkdown)
+
 #' Generate a PDF file from a list of texts
 #' 
 #' Used to save the outuput of functions like [extract_questions()] and
@@ -15,7 +17,7 @@ write_list <- function(text_list, pdf_output) {
     temp_file <- gsub("[.]pdf$", ".Rmd", output_file)
     options(encoding = "UTF-8")
     cat(text, file = temp_file, sep = "\n\n\n")
-    render(temp_file, pdf_document())
+    render(temp_file, html_document())
     file.remove(temp_file)
   }
   create_pdf(text, pdf_output)
